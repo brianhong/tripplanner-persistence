@@ -17,6 +17,8 @@
 
 var tripModule = (function () {
 
+  var $dayButtons = $('.day-buttons');
+
   // application state
 
   var days = [],
@@ -88,7 +90,15 @@ var tripModule = (function () {
       // ~~~~~~~~~~~~~~~~~~~~~~~
         //If we are trying to load existing Days, then let's make a request to the server for the day. Remember this is async. For each day we get back what do we need to do to it?
       // ~~~~~~~~~~~~~~~~~~~~~~~
-      $(addDay);
+      // $(addDay);
+
+      $.ajax({
+        method: 'GET',
+        url: '/api/days'
+    })
+    .then( (allDays) => {
+        allDays.forEach(dayModule.create, $dayButtons);
+    });
     },
 
     switchTo: switchTo,

@@ -20,4 +20,9 @@ router.get('/', function(req, res, next) {
   .catch(next);
 });
 
+router.use('/api/hotels', require('./hotels'));
+router.use('/api/restaurants', require('./restaurants'));
+router.use('/api/activities', require('./activities'));
+router.use('/api/days', require('./days'));
+
 module.exports = router;
