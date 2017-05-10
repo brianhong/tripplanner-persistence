@@ -95,10 +95,14 @@ var tripModule = (function () {
       $.ajax({
         method: 'GET',
         url: '/api/days'
-    })
-    .then( (allDays) => {
-        allDays.forEach(dayModule.create, $dayButtons);
-    });
+      })
+      .then( (allDays) => {
+          allDays.forEach(function(day){
+            dayModule.create(day);
+            days.push(day);
+          }, $dayButtons);
+      });
+
     },
 
     switchTo: switchTo,
