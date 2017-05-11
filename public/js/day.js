@@ -168,13 +168,31 @@ var dayModule = (function () {
     // removing from the day object
     switch (attraction.type) {
       case 'hotel':
-        this.hotel = null;
+        $.ajax({
+          method: 'DELETE',
+          url: `/api/days/${this.number}/hotel/${attraction.id}`
+        })
+        .then(() => {
+          this.hotel = null;
+        });
         break;
       case 'restaurant':
-        utilsModule.remove(this.restaurants, attraction);
+        $.ajax({
+          method: 'DELETE',
+          url: `/api/days/${this.number}/restaurant/${attraction.id}`
+        })
+        .then(() => {
+          utilsModule.remove(this.restaurants, attraction);
+        });
         break;
       case 'activity':
-        utilsModule.remove(this.activities, attraction);
+        $.ajax({
+          method: 'DELETE',
+          url: `/api/days/${this.number}/activity/${attraction.id}`
+        })
+        .then(() => {
+          utilsModule.remove(this.activities, attraction);
+        });
         break;
       default: console.error('bad type:', attraction);
     }

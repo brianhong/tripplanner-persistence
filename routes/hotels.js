@@ -3,7 +3,6 @@ const router = require('express').Router();
 
 const Hotel = require('../models').Hotel;
 
-
 router.get('/', (req, res, next) => {
   Hotel.findAll({})
   .then(allHotels => res.send(allHotels));

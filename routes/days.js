@@ -3,7 +3,8 @@ var router = require('express').Router();
 
 
 var Day = require('../models').Day;
-
+var Restaurant = require('../models').Restaurant;
+var Activity = require('../models').Activity;
 
 router.get('/', (req, res, next) => {
   Day.findAll({
@@ -71,18 +72,20 @@ router.put('/:dayNum/activity/:activityId', (req, res, next) => {
 router.delete('/:dayNum', (req, res, next) => {
   
   Day.destroy({
-    where: {id: req.params.dayNum}
+    where: {number: req.params.dayNum}
   })
   .then(() => {
-    console.log('right before finding');
     Day.findAll({
       where: {number: {$gt: req.params.dayNum}}
     })
     .then(days => {
       days.forEach(day => {
-        console.log(day.number, day.previous);
+        const updatedNumber = day.number - 1;
         day.update({
-          number: day.previous
+          number: updatedNumber
+        })
+        .then(updatedDay => {
+          console.log("AFTER:", updatedDay.number, updatedDay.previous);
         })
       })
     })
@@ -90,6 +93,57 @@ router.delete('/:dayNum', (req, res, next) => {
   .then(() => {
     res.status(200).send('you destroyed it!!!');
   });
+});
+
+router.delete('/:dayNum/hotel/:hotelId', (req, res, next) => {
+  Day.findOne({
+    where: {number: req.params.dayNum}
+  })
+  .then((day) => {
+    return day.update({
+      hotelId: null
+    })
+  })
+  .then(() => {
+    console.log('Successfully removed hotel from day ' , req.params.dayNum);
+    res.end();
+  })
+});
+
+router.delete('/:dayNum/restaurant/:restaurantId', (req, res, next) => {
+  Day.findOne({
+    where: {number: req.params.dayNum}
+  })
+  .then((day) => {
+    return Restaurant.findOne({
+      where: {id: req.params.restaurantId}
+    })
+    .then((restaurant) => {
+      day.removeRestaurant(restaurant);
+    })
+  })
+  .then(() => {
+    console.log('Successfully removed restaurant from day ' , req.params.dayNum);
+    res.end();
+  })
+});
+
+router.delete('/:dayNum/activity/:activityId', (req, res, next) => {
+  Day.findOne({
+    where: {number: req.params.dayNum}
+  })
+  .then((day) => {
+    return Activity.findOne({
+      where: {id: req.params.activityId}
+    })
+    .then((activity) => {
+      day.removeActivity(activity);
+    })
+  })
+  .then(() => {
+    console.log('Successfully removed restaurant from day ' , req.params.dayNum);
+    res.end();
+  })
 });
 
 module.exports = router;

@@ -75,13 +75,13 @@ var tripModule = (function () {
     // Do not delete a day until it has already been deleted from the DB
   // ~~~~~~~~~~~~~~~~~~~~~~~
   function deleteCurrentDay () {
-    // prevent deleting last day
     $.ajax({
       method: 'DELETE',
       url: `/api/days/${currentDay.number}`
     })
     .then(response => {
       console.log(`day ${currentDay.number} destroyed `, response);
+      // prevent deleting last day
       if (days.length < 2 || !currentDay) return;
       // remove from the collection
       var index = days.indexOf(currentDay),
