@@ -35,9 +35,32 @@ var dayModule = (function () {
     this.activities = [];
     // for days based on existing data
     utilsModule.merge(data, this);
-    if (this.hotel) this.hotel = attractionsModule.getEnhanced(this.hotel);
-    this.restaurants = this.restaurants.map(attractionsModule.getEnhanced);
-    this.activities = this.activities.map(attractionsModule.getEnhanced);
+    if (this.hotelId) {
+      // ajax request for 
+      $.ajax({
+        method: 'GET',
+        url: `/api/hotels/${this.hotelId}`
+      })
+      .then(hotel => {
+        this.hotel = attractionsModule.getEnhanced(hotel);
+      });
+    }
+
+    $.ajax({
+      method: 'GET',
+      url: `/api/restaurants/${this.number}`
+    })
+    .then(restaurants => {
+      this.restaurants = restaurants.map(attractionsModule.getEnhanced);
+    });
+
+    $.ajax({
+      method: 'GET',
+      url: `/api/activities/${this.number}`
+    })
+    .then(activities => {
+      this.activities = activities.map(attractionsModule.getEnhanced);
+    });
     // remainder of constructor
     this.buildButton().showButton();
   }
@@ -79,6 +102,7 @@ var dayModule = (function () {
     if (this.hotel) show(this.hotel);
     this.restaurants.forEach(show);
     this.activities.forEach(show);
+    console.log(this);
   };
 
   Day.prototype.hide = function () {
@@ -101,14 +125,33 @@ var dayModule = (function () {
     // adding to the day object
     switch (attraction.type) {
       case 'hotel':
-        if (this.hotel) this.hotel.hide();
+        if (this.hotel) {
+          this.hotel.hide();
+          // remove old hotel
+        }
         this.hotel = attraction;
+        $.ajax({
+          method: 'PUT',
+          url: `/api/days/${this.number}/hotel/${this.hotel.id}`
+        });
         break;
       case 'restaurant':
-        utilsModule.pushUnique(this.restaurants, attraction);
+        $.ajax({
+          method: 'PUT',
+          url: `/api/days/${this.number}/restaurant/${attraction.id}`
+        })
+        .then(response => {
+          utilsModule.pushUnique(this.restaurants, attraction);
+        });
         break;
       case 'activity':
-        utilsModule.pushUnique(this.activities, attraction);
+        $.ajax({
+          method: 'PUT',
+          url: `/api/days/${this.number}/activity/${attraction.id}`
+        })
+        .then(response => {
+          utilsModule.pushUnique(this.activities, attraction);
+        });
         break;
       default: console.error('bad type:', attraction);
     }

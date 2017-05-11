@@ -55,8 +55,16 @@ var tripModule = (function () {
   // ~~~~~~~~~~~~~~~~~~~~~~~
   function addDay () { 
     if (this && this.blur) this.blur(); // removes focus box from buttons
-    var newDay = dayModule.create({ number: days.length + 1 }); // dayModule
+    const dayNum = days.length + 1;
+    var newDay = dayModule.create({ number: dayNum }); // dayModule
     days.push(newDay);
+    $.ajax({
+      method: 'POST',
+      url: `/api/days/${dayNum}`
+    })
+    .then(response => {
+      // console.log(response);
+    });
     if (days.length === 1) {
       currentDay = newDay;
     }
@@ -68,17 +76,27 @@ var tripModule = (function () {
   // ~~~~~~~~~~~~~~~~~~~~~~~
   function deleteCurrentDay () {
     // prevent deleting last day
-    if (days.length < 2 || !currentDay) return;
-    // remove from the collection
-    var index = days.indexOf(currentDay),
-      previousDay = days.splice(index, 1)[0],
-      newCurrent = days[index] || days[index - 1];
-    // fix the remaining day numbers
-    days.forEach(function (day, i) {
-      day.setNumber(i + 1);
-    });
-    switchTo(newCurrent);
-    previousDay.hideButton();
+    $.ajax({
+      method: 'DELETE',
+      url: `/api/days/${currentDay.number}`
+    })
+    .then(response => {
+      console.log(`day ${currentDay.number} destroyed `, response);
+      if (days.length < 2 || !currentDay) return;
+      // remove from the collection
+      var index = days.indexOf(currentDay),
+        previousDay = days.splice(index, 1)[0],
+        newCurrent = days[index] || days[index - 1];
+      // fix the remaining day numbers
+      console.log(days);
+      days.forEach(function (day, i) {
+        day.setNumber(i + 1);
+      });
+      switchTo(newCurrent);
+      previousDay.hideButton();
+    })
+
+
   }
 
   // globally accessible module methods
@@ -97,9 +115,9 @@ var tripModule = (function () {
         url: '/api/days'
       })
       .then( (allDays) => {
+          allDays.sort((a, b) => a.id > b.id);
           allDays.forEach(function(day){
-            dayModule.create(day);
-            days.push(day);
+            days.push(dayModule.create(day));
           }, $dayButtons);
       });
 
